@@ -1,7 +1,7 @@
 # Random Food Picture Application
 
 This is a simple web application that fetches and displays random food pictures from the Spoonacular API. The application is built using PHP, JavaScript, and jQuery.
-
+## The website is hosted on: https://bout0047.github.io/API/
 ## Setup Instructions
 
 Follow these steps to set up and run the application:
