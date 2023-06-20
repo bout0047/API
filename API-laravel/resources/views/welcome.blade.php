@@ -1,108 +1,68 @@
-<?php
-
-function getImageUrl($recipeId, $imageType, $size) {
-    $basePath = "https://spoonacular.com/recipeImages/";
-    $imageUrl = $basePath . $recipeId . "-" . $size . "." . $imageType;
-    return $imageUrl;
-}
-
-$recipeId1 = rand(1, 100000);
-$recipeId2 = rand(1, 100000);
-$recipeId3 = rand(1, 100000);
-
-?>
-
 @extends('common.navbar')
 
 @section('content')
+<?php
+
+function getRandomFoodImage() {
+    $recipeId = rand(1, 500);
+    $imageType = 'jpg';
+    $size = '556x370';
+    $imageUrl = "https://spoonacular.com/recipeImages/{$recipeId}-{$size}.{$imageType}";
+    return $imageUrl;
+}
+
+// Check if it's an AJAX request for a new random image
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {
+    // Return a JSON response with the new random image URL
+    $response = array('imageUrl' => getRandomFoodImage());
+    header('Content-Type: application/json');
+    echo json_encode($response);
+    exit();
+}
+
+?>
+
     <!DOCTYPE html>
 <html>
 <head>
-    <title>Slideshow Example</title>
+    <title>Random Food Picture</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
     <style>
         body {
             background-color: #86a58d; /* Green background color */
+            text-align: center;
         }
 
-        .slideshow-container {
-            position: relative;
-            max-width: 100%;
-            margin: 20px auto;
-        }
-
-        .slide {
-            display: none;
-        }
-
-        .slide img {
-            width: 70%; /* Adjust the width as needed */
-            length: 50%;
-            height: auto;
-            margin: 0 auto;
-        }
-
-        .slide-caption {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.5);
-            color: #fff;
-            padding: 10px;
+        #food-picture {
+            margin-top: 50px;
         }
     </style>
 </head>
 <body>
-<div class="container">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="slideshow-container">
-                <div class="slide">
-                    <img src="{{ getImageUrl($recipeId1, 'jpg', '556x370') }}" alt="Slide 1">
-                    <div class="slide-caption">
-                        <h3>Slide 1</h3>
-                        <p>This is the caption for slide 1.</p>
-                    </div>
-                </div>
-                <div class="slide">
-                    <img src="{{ getImageUrl($recipeId2, 'jpg', '556x370') }}" alt="Slide 2">
-                    <div class="slide-caption">
-                        <h3>Slide 2</h3>
-                        <p>This is the caption for slide 2.</p>
-                    </div>
-                </div>
-                <div class="slide">
-                    <img src="{{ getImageUrl($recipeId3, 'jpg', '556x370') }}" alt="Slide 3">
-                    <div class="slide-caption">
-                        <h3>Slide 3</h3>
-                        <p>This is the caption for slide 3.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<h1>Random Food Picture</h1>
+<div id="food-picture">
+    <img src="<?php echo getRandomFoodImage(); ?>" alt="Food Picture" width="400">
 </div>
+<button id="change-picture-btn">Change Picture</button>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
     $(document).ready(function() {
-        // Initialize the slideshow
-        $('.slideshow-container').each(function() {
-            var slides = $(this).find('.slide');
-            var currentSlide = 0;
 
-            // Function to show the next slide
-            function showNextSlide() {
-                slides.eq(currentSlide).fadeOut();
-                currentSlide = (currentSlide + 1) % slides.length;
-                slides.eq(currentSlide).fadeIn();
-            }
-
-            // Start the slideshow
-            slides.hide();
-            slides.first().show();
-            setInterval(showNextSlide, 3000);
+        $('#change-picture-btn').on('click', function() {
+            $.ajax({
+                url: window.location.href,
+                method: 'GET',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                },
+                success: function(response) {
+                    $('#food-picture img').attr('src', response.imageUrl);
+                },
+                error: function() {
+                    alert('Failed to fetch a new random image. Please try again.');
+                }
+            });
         });
     });
 </script>
